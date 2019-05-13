@@ -31,9 +31,10 @@ class ItemActivity : AppCompatActivity() {
         todoId = intent.getLongExtra(INTENT_TODO_ID,-1)
         dbHandler =DBHandler(this)
 
+
         rv_item.layoutManager = LinearLayoutManager(this)
 
-        fab_item.setOnClickListener{
+            fab_item.setOnClickListener{
             val dialog = AlertDialog.Builder(this)
             val view = layoutInflater.inflate(R.layout.dialog_dashboard, null)
             val toDoName = view.findViewById<EditText>(R.id.ev_todo)
