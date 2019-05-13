@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">タスク管理</string>
+    <string name="edit">編集</string>
+    <string name="mark_as_completed">すべてマークする</string>
+    <string name="delete">タスク削除</string>
+    <string name="reset">マークをリセットする</string>
+    <string name="menu_as_completed">すべてマークする</string>
+</resources>
