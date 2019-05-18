@@ -7,6 +7,7 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +21,8 @@ import kotlinx.android.synthetic.main.activity_dashboard.*
 class Dashboard : AppCompatActivity() {
 
     lateinit var dbHandler: DBHandler
+    var list : MutableList<ToDo>? = null
+    var adapter : DashboardAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +31,28 @@ class Dashboard : AppCompatActivity() {
         title = "タスク一覧"
         dbHandler = DBHandler(this)
         rv_dashboard.layoutManager = LinearLayoutManager(this)
+
+        val touchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN,0) {
+            override fun onSwiped(p0: RecyclerView.ViewHolder, p1: Int) {
+                // Delete 入れるか？？
+            }
+
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+
+                val from = viewHolder.adapterPosition
+                val to = target.adapterPosition
+
+//                Collections.swap(list,from,to)
+
+                adapter?.notifyItemMoved(from, to)
+
+                return true
+            }
+        })
+        touchHelper.attachToRecyclerView(rv_dashboard)
+        rv_dashboard.addItemDecoration(touchHelper)
+
 
         fab_dashboard.setOnClickListener {
             val dialog = AlertDialog.Builder(this)
@@ -78,7 +103,9 @@ class Dashboard : AppCompatActivity() {
     }
 
     private fun refreshList(){
-        rv_dashboard.adapter = DashboardAdapter(this,dbHandler.getToDos())
+        list = dbHandler.getToDos()
+        adapter = DashboardAdapter(this,list!!)
+        rv_dashboard.adapter = adapter
     }
 
 

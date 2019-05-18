@@ -108,6 +108,7 @@ class DBHandler(val context: Context) : SQLiteOpenHelper(context, DB_NAME,null, 
         db.update(TABLE_TODO_ITEM,cv,"$COL_ID=?" , arrayOf(item.id.toString()))
     }
 
+
     fun deleteToDoItem(itemId: Long){
         val db = writableDatabase
         db.delete(TABLE_TODO_ITEM,"$COL_ID=?", arrayOf(itemId.toString()))
@@ -134,5 +135,9 @@ class DBHandler(val context: Context) : SQLiteOpenHelper(context, DB_NAME,null, 
         queryResult.close()
         return result
     }
+    fun change(list: List<ToDoItem>){
+
+    }
+
 
 }
