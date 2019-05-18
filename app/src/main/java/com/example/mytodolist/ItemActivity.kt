@@ -6,6 +6,7 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -15,11 +16,16 @@ import android.widget.EditText
 import android.widget.ImageView
 import com.example.mytodolist.DTO.ToDoItem
 import kotlinx.android.synthetic.main.activity_item.*
+import java.util.*
 
 class ItemActivity : AppCompatActivity() {
 
     lateinit var dbHandler: DBHandler
     var todoId : Long = -1
+
+    var list: MutableList<ToDoItem>? = null
+    var adapter : ItemAdapter? = null
+    var touchHelper : ItemTouchHelper? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +39,7 @@ class ItemActivity : AppCompatActivity() {
 
 
         rv_item.layoutManager = LinearLayoutManager(this)
+
 
             fab_item.setOnClickListener{
             val dialog = AlertDialog.Builder(this)
@@ -55,7 +62,34 @@ class ItemActivity : AppCompatActivity() {
             dialog.show()
         }
 
+         touchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN,0){
+
+
+            override fun onSwiped(p0: RecyclerView.ViewHolder, p1: Int) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+             override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
+                 val dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
+                 val swipeFlags = ItemTouchHelper.START or ItemTouchHelper.END
+                 return ItemTouchHelper.Callback.makeMovementFlags(dragFlags,swipeFlags)
+             }
+
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+
+                val from = viewHolder.adapterPosition
+                val to = target.adapterPosition
+                Collections.swap(list,from,to)
+                adapter?.notifyItemMoved(from,to)
+
+                return true
+            }
+        })
+        touchHelper?.attachToRecyclerView(rv_item)
+
     }
+
 
     fun updateItem(item : ToDoItem){
         val dialog = AlertDialog.Builder(this)
@@ -85,7 +119,9 @@ class ItemActivity : AppCompatActivity() {
     }
 
     private fun refreshList(){
-        rv_item.adapter = ItemAdapter(this,dbHandler.getToDoItems(todoId))
+        list = dbHandler.getToDoItems(todoId)
+        adapter = ItemAdapter(this,list!!)
+        rv_item.adapter = adapter
     }
 
 
@@ -110,11 +146,11 @@ class ItemActivity : AppCompatActivity() {
                 val dialog = AlertDialog.Builder(activity)
                 dialog.setTitle("サブタスクの削除")
                 dialog.setMessage("本当に削除しますか??")
-                dialog.setPositiveButton("削除") { dialog: DialogInterface?, _: Int ->
+                dialog.setPositiveButton("削除") { _: DialogInterface?, _: Int ->
                 activity.dbHandler.deleteToDoItem(list[p1].id)
                 activity.refreshList()
                 }
-                dialog.setNegativeButton("やめる") { dialog: DialogInterface?, _: Int ->
+                dialog.setNegativeButton("やめる") { _: DialogInterface?, _: Int ->
 
                 }
                 dialog.show()
@@ -122,12 +158,14 @@ class ItemActivity : AppCompatActivity() {
             holder.edit.setOnClickListener{
                 activity.updateItem(list[p1])
             }
+
         }
 
         class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
             val itemName: CheckBox = v.findViewById(R.id.cb_item)
             val edit : ImageView = v.findViewById(R.id.iv_edit)
             val delete : ImageView = v.findViewById(R.id.iv_delete)
+
         }
     }
 
